@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package org.foi.nwtis.dkermek.web.podaci;
+package org.foi.nwtis.jurbunic.web.podaci;
 
 import java.util.Date;
 
