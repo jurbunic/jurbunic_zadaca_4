@@ -7,6 +7,7 @@ package org.foi.nwtis.jurbunic.rest.klijenti;
 
 import java.io.StringReader;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
 import java.util.logging.Level;
@@ -102,14 +103,18 @@ public class OWMKlijent {
         webResource = webResource.queryParam("units", "metric");
         webResource = webResource.queryParam("APIKEY", apiKey);
 
+        Calendar cal = Calendar.getInstance();
         String odgovor = webResource.request(MediaType.APPLICATION_JSON).get(String.class);
         try {
             JsonReader reader = Json.createReader(new StringReader(odgovor));
-            JsonArray array = reader.readArray();
-            for (int i = 0; i < array.size(); i++) {
-                JsonObject jo = reader.readObject();
+            JsonObject odg = reader.readObject();
+            JsonArray polje = odg.getJsonArray("list");
+            for (int i = 0; i < polje.size(); i++) {
+                JsonObject jo = polje.getJsonObject(i);
 
                 MeteoPodaci mp = new MeteoPodaci();
+                cal.setTime(new Date(jo.getJsonNumber("dt").bigDecimalValue().longValue() * 1000));
+                
                 mp.setTemperatureValue(new Double(jo.getJsonObject("main").getJsonNumber("temp").doubleValue()).floatValue());
                 mp.setTemperatureMin(new Double(jo.getJsonObject("main").getJsonNumber("temp_min").doubleValue()).floatValue());
                 mp.setTemperatureMax(new Double(jo.getJsonObject("main").getJsonNumber("temp_max").doubleValue()).floatValue());
@@ -137,12 +142,12 @@ public class OWMKlijent {
                 mp.setWeatherIcon(jo.getJsonArray("weather").getJsonObject(0).getString("icon"));
 
                 mp.setLastUpdate(new Date(jo.getJsonNumber("dt").bigDecimalValue().longValue() * 1000));
-                mpr.add(new MeteoPrognoza(id, i, mp));
+                mpr.add(new MeteoPrognoza(id, cal.get(Calendar.DAY_OF_WEEK), mp));
             }
         } catch (Exception ex) {
             Logger.getLogger(OWMKlijent.class.getName()).log(Level.SEVERE, null, ex);
         }
-        MeteoPrognoza[] polje = (MeteoPrognoza[]) mpr.toArray();
-        return null;
+        MeteoPrognoza[] polje = mpr.toArray(new MeteoPrognoza[mpr.size()]);
+        return polje;
     }
 }

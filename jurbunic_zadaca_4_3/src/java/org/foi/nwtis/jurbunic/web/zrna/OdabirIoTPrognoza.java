@@ -9,6 +9,7 @@ import javax.inject.Named;
 import javax.enterprise.context.SessionScoped;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import javax.ejb.EJB;
@@ -47,6 +48,7 @@ public class OdabirIoTPrognoza implements Serializable {
     private boolean prognoze = false;
     private String gumbPregledPrognoza = "Pregled prognoza";
     private List<MeteoPrognoza> meteoPronoze = new ArrayList<>();
+    private List<Uredaji> raspIoT;
 
     /**
      * Creates a new instance of OdabirIoTPrognoza
@@ -54,17 +56,43 @@ public class OdabirIoTPrognoza implements Serializable {
     public OdabirIoTPrognoza() {
     }
 
+    public String dodajIoTUredaj() {
+        Lokacija lok = meteoIoTKlijent.dajLokaciju(noviAdresa);
+        Uredaji uredaj = new Uredaji(Integer.parseInt(noviId), noviNaziv, Float.parseFloat(lok.getLatitude()), Float.parseFloat(lok.getLongitude()), 0, new Date(), new Date());
+        uredajiFacade.create(uredaj);
+        preuzmiRaspoloziveIoT();
+        return "";
+    }
+
+    private void preuzmiRaspoloziveIoT() {
+        raspIoT = uredajiFacade.findAll();
+        raspoloziviIoT.clear();
+        for (Uredaji u : raspIoT) {
+            raspoloziviIoT.add(new Izbornik(u.getNaziv(), u.getId().toString()));
+        }
+    }
+
     public void odaberiUredajeZaPracenje() {
+        int ukupno = popisRaspoloziviIoT.size();
         for (int i = 0; i < popisRaspoloziviIoT.size(); i++) {
             for (int j = 0; j < raspoloziviIoT.size(); j++) {
                 if (raspoloziviIoT.get(j).getVrijednost().compareTo(popisRaspoloziviIoT.get(i)) == 0) {
                     odabraniIoT.add(raspoloziviIoT.get(j));
                     raspoloziviIoT.remove(j);
+                    if(ukupno == odabraniIoT.size()){
+                        return;
+                    }
                 }
             }
         }
     }
+    
+    public void dohvatiPrognozuZaOdabraneIoT(){
+        MeteoPrognoza[] mp = meteoIoTKlijent.dajMeteoPrognoze(Integer.valueOf(popisOdabraniIoT.get(0)), "Pavlinska 2, Varazdin");
+        meteoPronoze = Arrays.asList(mp);
+    }
 
+    // ------- Getteri & Setteri -----------
     public String getNoviId() {
         return noviId;
     }
@@ -178,22 +206,6 @@ public class OdabirIoTPrognoza implements Serializable {
 
     public void setMeteoPronoze(List<MeteoPrognoza> meteoPronoze) {
         this.meteoPronoze = meteoPronoze;
-    }
-
-    public String dodajIoTUredaj() {
-        Lokacija lok = meteoIoTKlijent.dajLokaciju(noviAdresa);
-        Uredaji uredaj = new Uredaji(Integer.parseInt(noviId), noviNaziv, Float.parseFloat(lok.getLatitude()), Float.parseFloat(lok.getLongitude()), 0, new Date(), new Date());
-        uredajiFacade.create(uredaj);
-        preuzmiRaspoloziveIoT();
-        return "";
-    }
-
-    private void preuzmiRaspoloziveIoT() {
-        List<Uredaji> raspIoT = uredajiFacade.findAll();
-        raspoloziviIoT.clear();
-        for (Uredaji u : raspIoT) {
-            raspoloziviIoT.add(new Izbornik(u.getNaziv(), u.getId().toString()));
-        }
     }
 
 }

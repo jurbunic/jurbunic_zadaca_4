@@ -3,7 +3,9 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:f="http://xmlns.jcp.org/jsf/core">
+      xmlns:f="http://xmlns.jcp.org/jsf/core"
+      xmlns:p="http://primefaces.org/ui"
+      >
 
     <body>
 
@@ -56,7 +58,28 @@
                         <h:selectManyListbox id="odabraniIoT" value="#{odabirIoTPrognoza.popisOdabraniIoT}" size="7">
                             <f:selectItems value="#{odabirIoTPrognoza.odabraniIoT}" var="i" itemLabel="#{i.labela}" itemValue="#{i.vrijednost}"/>
                         </h:selectManyListbox>
-                        <h:commandButton value="#{odabirIoTPrognoza.gumbPregledPrognoza}" action="preuzmi"/><br/>
+                        <h:commandButton id="pregledPrognoza" value="#{odabirIoTPrognoza.gumbPregledPrognoza}" action="#{odabirIoTPrognoza.dohvatiPrognozuZaOdabraneIoT()}">
+                            <f:ajax execute="odabraniIoT" render="tablicaMeteo" />
+                        </h:commandButton><br/>
+                    </h:panelGrid>
+                    <h:panelGrid>
+                        <p:dataTable id="tablicaMeteo" var="meteo" value="#{odabirIoTPrognoza.meteoPronoze}" paginator="true" rows="8">
+                            <p:column headerText="id">
+                                <h:outputText value="#{meteo.id}" />
+                            </p:column>
+                            <p:column headerText="dan u tjednu">
+                                <h:outputText value="#{meteo.dan}" />
+                            </p:column>
+                            <p:column headerText="temperatura">
+                                <h:outputText value="#{meteo.prognoza.temperatureValue}" />
+                            </p:column>
+                            <p:column headerText="vlaga">
+                                <h:outputText value="#{meteo.prognoza.humidityValue}" />
+                            </p:column>
+                            <p:column headerText="tlak">
+                                <h:outputText value="#{meteo.prognoza.pressureValue}" />
+                            </p:column>
+                        </p:dataTable>
                     </h:panelGrid>
                 </h:form>
             </ui:define>
