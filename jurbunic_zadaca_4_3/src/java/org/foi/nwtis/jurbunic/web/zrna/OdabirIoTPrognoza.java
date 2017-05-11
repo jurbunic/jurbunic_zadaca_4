@@ -47,11 +47,22 @@ public class OdabirIoTPrognoza implements Serializable {
     private boolean prognoze = false;
     private String gumbPregledPrognoza = "Pregled prognoza";
     private List<MeteoPrognoza> meteoPronoze = new ArrayList<>();
-    
+
     /**
      * Creates a new instance of OdabirIoTPrognoza
      */
     public OdabirIoTPrognoza() {
+    }
+
+    public void odaberiUredajeZaPracenje() {
+        for (int i = 0; i < popisRaspoloziviIoT.size(); i++) {
+            for (int j = 0; j < raspoloziviIoT.size(); j++) {
+                if (raspoloziviIoT.get(j).getVrijednost().compareTo(popisRaspoloziviIoT.get(i)) == 0) {
+                    odabraniIoT.add(raspoloziviIoT.get(j));
+                    raspoloziviIoT.remove(j);
+                }
+            }
+        }
     }
 
     public String getNoviId() {
@@ -103,7 +114,9 @@ public class OdabirIoTPrognoza implements Serializable {
     }
 
     public List<Izbornik> getRaspoloziviIoT() {
-        preuzmiRaspoloziveIoT();         
+        if (raspoloziviIoT.isEmpty()) {
+            preuzmiRaspoloziveIoT();
+        }
         return raspoloziviIoT;
     }
 
@@ -166,21 +179,21 @@ public class OdabirIoTPrognoza implements Serializable {
     public void setMeteoPronoze(List<MeteoPrognoza> meteoPronoze) {
         this.meteoPronoze = meteoPronoze;
     }
-    
+
     public String dodajIoTUredaj() {
         Lokacija lok = meteoIoTKlijent.dajLokaciju(noviAdresa);
         Uredaji uredaj = new Uredaji(Integer.parseInt(noviId), noviNaziv, Float.parseFloat(lok.getLatitude()), Float.parseFloat(lok.getLongitude()), 0, new Date(), new Date());
         uredajiFacade.create(uredaj);
-        preuzmiRaspoloziveIoT();        
+        preuzmiRaspoloziveIoT();
         return "";
     }
-    
+
     private void preuzmiRaspoloziveIoT() {
         List<Uredaji> raspIoT = uredajiFacade.findAll();
         raspoloziviIoT.clear();
-        for(Uredaji u : raspIoT) {
+        for (Uredaji u : raspIoT) {
             raspoloziviIoT.add(new Izbornik(u.getNaziv(), u.getId().toString()));
         }
     }
-    
+
 }

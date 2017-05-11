@@ -47,7 +47,9 @@
                             <f:selectItems value="#{odabirIoTPrognoza.raspoloziviIoT}" var="i" itemLabel="#{i.labela}" itemValue="#{i.vrijednost}"/>
                         </h:selectManyListbox>
                         <h:panelGroup>
-                            <h:commandButton value=" Preuzmi " action="preuzmi"/><br/>
+                            <h:commandButton value=" Preuzmi " action="#{odabirIoTPrognoza.odaberiUredajeZaPracenje()}">
+                                <f:ajax execute="raspoloziviIoT" render="odabraniIoT raspoloziviIoT" />
+                            </h:commandButton><br/>
                             <h:commandButton value=" Vrati " action="preuzmi"/><br/>
                             <h:commandButton value=" Ažuriraj " action="preuzmi"/><br/>
                         </h:panelGroup>
