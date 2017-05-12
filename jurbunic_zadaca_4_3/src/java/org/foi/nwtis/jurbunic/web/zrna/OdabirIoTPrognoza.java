@@ -16,6 +16,7 @@ import javax.ejb.EJB;
 import org.foi.nwtis.jurbunic.ejb.eb.Uredaji;
 import org.foi.nwtis.jurbunic.ejb.sb.MeteoIoTKlijent;
 import org.foi.nwtis.jurbunic.ejb.sb.UredajiFacade;
+import org.foi.nwtis.jurbunic.rest.klijenti.GMKlijent;
 import org.foi.nwtis.jurbunic.web.kontrole.Izbornik;
 import org.foi.nwtis.jurbunic.web.podaci.Lokacija;
 import org.foi.nwtis.jurbunic.web.podaci.MeteoPrognoza;
@@ -49,6 +50,7 @@ public class OdabirIoTPrognoza implements Serializable {
     private String gumbPregledPrognoza = "Pregled prognoza";
     private List<MeteoPrognoza> meteoPronoze = new ArrayList<>();
     private List<Uredaji> raspIoT;
+    private List<Uredaji> odabIoT = new ArrayList<>();
 
     /**
      * Creates a new instance of OdabirIoTPrognoza
@@ -78,6 +80,7 @@ public class OdabirIoTPrognoza implements Serializable {
             for (int j = 0; j < raspoloziviIoT.size(); j++) {
                 if (raspoloziviIoT.get(j).getVrijednost().compareTo(popisRaspoloziviIoT.get(i)) == 0) {
                     odabraniIoT.add(raspoloziviIoT.get(j));
+                    odabIoT.add(raspIoT.get(j));
                     raspoloziviIoT.remove(j);
                     if(ukupno == odabraniIoT.size()){
                         return;
@@ -88,8 +91,14 @@ public class OdabirIoTPrognoza implements Serializable {
     }
     
     public void dohvatiPrognozuZaOdabraneIoT(){
-        MeteoPrognoza[] mp = meteoIoTKlijent.dajMeteoPrognoze(Integer.valueOf(popisOdabraniIoT.get(0)), "Pavlinska 2, Varazdin");
-        meteoPronoze = Arrays.asList(mp);
+        GMKlijent gmk = new GMKlijent();
+        gmk.reverseGeocoding(String.valueOf(odabIoT.get(0).getLatitude()), String.valueOf(odabIoT.get(0).getLongitude()));
+        for(int i=0;i<popisOdabraniIoT.size();i++){
+            Lokacija l = new Lokacija(String.valueOf(odabIoT.get(i).getLatitude()), String.valueOf(odabIoT.get(i).getLatitude()));
+            String adresa = gmk.reverseGeocoding(l.getLatitude(), l.getLongitude());
+            MeteoPrognoza[] mp = meteoIoTKlijent.dajMeteoPrognoze(Integer.valueOf(popisOdabraniIoT.get(i)), adresa);
+            meteoPronoze = Arrays.asList(mp);
+        }
     }
 
     // ------- Getteri & Setteri -----------

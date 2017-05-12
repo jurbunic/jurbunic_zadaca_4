@@ -47,13 +47,40 @@ public class GMKlijent {
             JsonReader reader = Json.createReader(new StringReader(odgovor));
 
             JsonObject jo = reader.readObject();
-                     
+
             JsonObject obj = jo.getJsonArray("results")
                     .getJsonObject(0)
                     .getJsonObject("geometry")
                     .getJsonObject("location");
 
             Lokacija loc = new Lokacija(obj.getJsonNumber("lat").toString(), obj.getJsonNumber("lng").toString());
+
+            return loc;
+
+        } catch (UnsupportedEncodingException ex) {
+            Logger.getLogger(OWMKlijent.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+
+    public String reverseGeocoding(String latitude, String longitude) {
+        try {
+            String latlng = latitude + "," + longitude;
+            WebTarget webResource = client.target(GMRESTHelper.getGM_BASE_URI())
+                    .path("maps/api/geocode/json");
+            webResource = webResource.queryParam("latlng",
+                    URLEncoder.encode(latlng, "UTF-8"));
+            webResource = webResource.queryParam("sensor", "false");
+
+            String odgovor = webResource.request(MediaType.APPLICATION_JSON).get(String.class);
+
+            JsonReader reader = Json.createReader(new StringReader(odgovor));
+
+            JsonObject jo = reader.readObject();
+
+            JsonObject obj = jo.getJsonArray("results")
+                    .getJsonObject(0);
+            String loc = obj.getJsonString("formatted_address").getString();
 
             return loc;
 
