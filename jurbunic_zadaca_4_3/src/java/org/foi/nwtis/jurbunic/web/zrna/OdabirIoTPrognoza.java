@@ -74,6 +74,23 @@ public class OdabirIoTPrognoza implements Serializable {
         }
     }
 
+    public void vratiUredaje() {
+        int ukupno = popisOdabraniIoT.size();
+        for (int i = 0; i < popisOdabraniIoT.size(); i++) {
+            for (int j = 0; j < odabraniIoT.size(); j++) {
+                if (odabraniIoT.get(j).getVrijednost().compareTo(popisOdabraniIoT.get(i)) == 0) {
+                    raspoloziviIoT.add(odabraniIoT.get(j));
+                    raspIoT.add(odabIoT.get(j));
+                    odabIoT.remove(j);
+                    odabraniIoT.remove(j);
+                    if(ukupno==odabraniIoT.size()){
+                        return;
+                    }
+                }
+            }
+        }
+    }
+
     public void odaberiUredajeZaPracenje() {
         int ukupno = popisRaspoloziviIoT.size();
         for (int i = 0; i < popisRaspoloziviIoT.size(); i++) {
@@ -81,24 +98,25 @@ public class OdabirIoTPrognoza implements Serializable {
                 if (raspoloziviIoT.get(j).getVrijednost().compareTo(popisRaspoloziviIoT.get(i)) == 0) {
                     odabraniIoT.add(raspoloziviIoT.get(j));
                     odabIoT.add(raspIoT.get(j));
+                    raspIoT.remove(j);
                     raspoloziviIoT.remove(j);
-                    if(ukupno == odabraniIoT.size()){
+                    if (ukupno == odabraniIoT.size()) {
                         return;
                     }
                 }
             }
         }
     }
-    
-    public void dohvatiPrognozuZaOdabraneIoT(){
-        GMKlijent gmk = new GMKlijent();
-        gmk.reverseGeocoding(String.valueOf(odabIoT.get(0).getLatitude()), String.valueOf(odabIoT.get(0).getLongitude()));
-        for(int i=0;i<popisOdabraniIoT.size();i++){
-            Lokacija l = new Lokacija(String.valueOf(odabIoT.get(i).getLatitude()), String.valueOf(odabIoT.get(i).getLatitude()));
-            String adresa = gmk.reverseGeocoding(l.getLatitude(), l.getLongitude());
+
+    public void dohvatiPrognozuZaOdabraneIoT() {
+        meteoPronoze.clear();
+        GMKlijent gmk = new GMKlijent();       
+        for (int i = 0; i < popisOdabraniIoT.size(); i++) {
+            String adresa = gmk.reverseGeocoding(String.valueOf(odabIoT.get(0).getLatitude()), String.valueOf(odabIoT.get(0).getLongitude()));
             MeteoPrognoza[] mp = meteoIoTKlijent.dajMeteoPrognoze(Integer.valueOf(popisOdabraniIoT.get(i)), adresa);
-            meteoPronoze = Arrays.asList(mp);
+            meteoPronoze.addAll(Arrays.asList(mp));
         }
+
     }
 
     // ------- Getteri & Setteri -----------

@@ -52,7 +52,9 @@
                             <h:commandButton value=" Preuzmi " action="#{odabirIoTPrognoza.odaberiUredajeZaPracenje()}">
                                 <f:ajax execute="raspoloziviIoT" render="odabraniIoT raspoloziviIoT" />
                             </h:commandButton><br/>
-                            <h:commandButton value=" Vrati " action="preuzmi"/><br/>
+                            <h:commandButton value=" Vrati " action="#{odabirIoTPrognoza.vratiUredaje()}">
+                                <f:ajax execute="odabraniIoT" render="odabraniIoT raspoloziviIoT" />
+                            </h:commandButton><br/>
                             <h:commandButton value=" Ažuriraj " action="preuzmi"/><br/>
                         </h:panelGroup>
                         <h:selectManyListbox id="odabraniIoT" value="#{odabirIoTPrognoza.popisOdabraniIoT}" size="7">
@@ -62,9 +64,9 @@
                             <f:ajax execute="odabraniIoT" render="tablicaMeteo" />
                         </h:commandButton><br/>
                     </h:panelGrid>
-                    <h:panelGrid>
+                    <h:panelGrid id="grupaMeteo">
                         <p:dataTable id="tablicaMeteo" var="meteo" value="#{odabirIoTPrognoza.meteoPronoze}" paginator="true" rows="8">
-                            <p:column headerText="id">
+                            <p:column headerText="id uređaja">
                                 <h:outputText value="#{meteo.id}" />
                             </p:column>
                             <p:column headerText="dan u tjednu">
