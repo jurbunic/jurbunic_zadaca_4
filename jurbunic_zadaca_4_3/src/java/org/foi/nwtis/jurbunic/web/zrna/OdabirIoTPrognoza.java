@@ -82,7 +82,7 @@ public class OdabirIoTPrognoza implements Serializable {
                     raspoloziviIoT.add(odabraniIoT.get(j));
                     raspIoT.add(odabIoT.get(j));
                     odabIoT.remove(j);
-                    odabraniIoT.remove(j);
+                    odabraniIoT.remove(j);                  
                     if(ukupno==odabraniIoT.size()){
                         return;
                     }

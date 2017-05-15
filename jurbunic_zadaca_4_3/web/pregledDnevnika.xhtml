@@ -2,7 +2,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
-      xmlns:h="http://xmlns.jcp.org/jsf/html">
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:p="http://primefaces.org/ui">
 
     <body>
 
@@ -23,7 +24,31 @@
             </ui:define>
 
             <ui:define name="content">
-                content
+                <h:form>
+                    <p:dataTable id="tablicDnevnik" var="dnevnik" value="#{pregledDnevnika.listaDnevnik}" paginator="true" rows="8">
+                        <p:column headerText="ID">
+                            <h:outputText value="#{dnevnik.id}" />
+                        </p:column>
+                        <p:column headerText="Korisnik">
+                            <h:outputText value="#{dnevnik.korisnik}" />
+                        </p:column>
+                        <p:column headerText="URL">
+                            <h:outputText value="#{dnevnik.url}" />
+                        </p:column>
+                        <p:column headerText="IP adresa">
+                            <h:outputText value="#{dnevnik.ipadresa}" />
+                        </p:column>
+                        <p:column headerText="Vrijeme">
+                            <h:outputText value="#{dnevnik.vrijeme}" />
+                        </p:column>
+                        <p:column headerText="Trajanje">
+                            <h:outputText value="#{dnevnik.trajanje}" />
+                        </p:column>
+                        <p:column headerText="Status">
+                            <h:outputText value="#{dnevnik.status}" />
+                        </p:column>
+                    </p:dataTable>
+                </h:form>
             </ui:define>
 
         </ui:composition>
