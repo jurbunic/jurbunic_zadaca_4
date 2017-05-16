@@ -3,7 +3,8 @@
 <html xmlns="http://www.w3.org/1999/xhtml"
       xmlns:ui="http://xmlns.jcp.org/jsf/facelets"
       xmlns:h="http://xmlns.jcp.org/jsf/html"
-      xmlns:p="http://primefaces.org/ui">
+      xmlns:p="http://primefaces.org/ui"
+      xmlns:f="http://xmlns.jcp.org/jsf/core">
 
     <body>
 
@@ -25,7 +26,21 @@
 
             <ui:define name="content">
                 <h:form>
-                    <p:dataTable id="tablicDnevnik" var="dnevnik" value="#{pregledDnevnika.listaDnevnik}" paginator="true" rows="8">
+                    <h:panelGroup>
+                        <h4>Filtriranje</h4><br/><br/>
+                        <h:outputLabel value="Korisnik" />
+                        <h:inputText id="txtKorisnik" value="#{pregledDnevnika.filterKorisnik}" /><br/>
+                        <h:outputLabel value="IP adresa" />
+                        <h:inputText id="txtIpadresa" value="#{pregledDnevnika.filterIpadresa}" /><br/>
+                        <h:outputLabel value="Trajanje" />
+                        <h:inputText id="txtTrajanje" value="#{pregledDnevnika.filterTrajanje}" /><br/>
+                        <h:outputLabel value="Status" />
+                        <h:inputText id="txtStatus" value="#{pregledDnevnika.filterStatus}" />
+                        <h:commandButton value="Filtriraj" action="#{pregledDnevnika.filtriraj()}">
+                            <f:ajax execute="txtKorisnik txtIpadresa txtTrajanje txtStatus" render="tablicaDnevnik" />
+                        </h:commandButton>
+                    </h:panelGroup>
+                    <p:dataTable id="tablicaDnevnik" var="dnevnik" value="#{pregledDnevnika.prikazDnevnik}" paginator="true" rows="8">
                         <p:column headerText="ID">
                             <h:outputText value="#{dnevnik.id}" />
                         </p:column>
