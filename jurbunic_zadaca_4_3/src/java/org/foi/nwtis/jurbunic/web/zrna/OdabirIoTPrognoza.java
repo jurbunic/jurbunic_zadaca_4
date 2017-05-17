@@ -13,7 +13,11 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import javax.ejb.EJB;
+import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
+import org.foi.nwtis.jurbunic.ejb.eb.Dnevnik;
 import org.foi.nwtis.jurbunic.ejb.eb.Uredaji;
+import org.foi.nwtis.jurbunic.ejb.sb.DnevnikFacade;
 import org.foi.nwtis.jurbunic.ejb.sb.MeteoIoTKlijent;
 import org.foi.nwtis.jurbunic.ejb.sb.UredajiFacade;
 import org.foi.nwtis.jurbunic.rest.klijenti.GMKlijent;
@@ -28,6 +32,9 @@ import org.foi.nwtis.jurbunic.web.podaci.MeteoPrognoza;
 @Named(value = "odabirIoTPrognoza")
 @SessionScoped
 public class OdabirIoTPrognoza implements Serializable {
+
+    @EJB
+    private DnevnikFacade dnevnikFacade;
 
     @EJB
     private MeteoIoTKlijent meteoIoTKlijent;
@@ -52,17 +59,26 @@ public class OdabirIoTPrognoza implements Serializable {
     private List<Uredaji> raspIoT;
     private List<Uredaji> odabIoT = new ArrayList<>();
 
+    private String dnevnikIp;
+    private String dnevnikUrl;
     /**
      * Creates a new instance of OdabirIoTPrognoza
      */
     public OdabirIoTPrognoza() {
+        HttpServletRequest httpServletRequest = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();  
+        dnevnikIp = httpServletRequest.getRemoteAddr();
+        dnevnikUrl = httpServletRequest.getRequestURI();
     }
 
     public String dodajIoTUredaj() {
+        long pocetak = System.currentTimeMillis();
         Lokacija lok = meteoIoTKlijent.dajLokaciju(noviAdresa);
         Uredaji uredaj = new Uredaji(Integer.parseInt(noviId), noviNaziv, Float.parseFloat(lok.getLatitude()), Float.parseFloat(lok.getLongitude()), 0, new Date(), new Date());
         uredajiFacade.create(uredaj);
         preuzmiRaspoloziveIoT();
+        long ukupno = System.currentTimeMillis()-pocetak;
+        Integer trajanje = (int) ukupno;
+        dnevnikFacade.create(new Dnevnik(null, "localhost", dnevnikUrl, dnevnikIp, trajanje, 1));
         return "";
     }
 

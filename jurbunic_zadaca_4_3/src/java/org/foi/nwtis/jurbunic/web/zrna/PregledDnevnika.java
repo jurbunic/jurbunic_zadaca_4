@@ -12,6 +12,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 import javax.ejb.EJB;
+import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpServletRequest;
 import org.foi.nwtis.jurbunic.ejb.eb.Dnevnik;
 import org.foi.nwtis.jurbunic.ejb.sb.DnevnikFacade;
 
@@ -33,11 +35,13 @@ public class PregledDnevnika implements Serializable {
     private String filterStatus;
     private boolean isChanged = true;
     private int brojUnosa=0;
-
+    private String dnevnikIp;
     /**
      * Creates a new instance of PregledDnevnika
      */
     public PregledDnevnika() {
+        HttpServletRequest httpServletRequest = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();  
+        dnevnikIp = httpServletRequest.getRemoteAddr(); 
     }
 
     private void dohvatiDnevnik() {
