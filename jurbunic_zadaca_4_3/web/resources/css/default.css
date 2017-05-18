@@ -46,3 +46,7 @@ a.navigationLink:hover{
     color: white;
     text-decoration: none;
 }
+
+table.sakriveno{
+   display: none; 
+}

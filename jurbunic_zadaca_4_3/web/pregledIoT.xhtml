@@ -6,7 +6,6 @@
       xmlns:f="http://xmlns.jcp.org/jsf/core"
       xmlns:p="http://primefaces.org/ui"
       >
-
     <body>
 
         <ui:composition template="./predlozak.xhtml">
@@ -26,7 +25,7 @@
             </ui:define>
 
             <ui:define name="content">
-                <h:form>
+                <h:form id="glavnaForma">
                     <h:panelGrid columns="3">
                         <h:outputLabel for="noviId" value="ID:"/>
                         <h:inputText id="noviId" value="#{odabirIoTPrognoza.noviId}"/>
@@ -49,23 +48,38 @@
                             <f:selectItems value="#{odabirIoTPrognoza.raspoloziviIoT}" var="i" itemLabel="#{i.labela}" itemValue="#{i.vrijednost}"/>
                         </h:selectManyListbox>
                         <h:panelGroup>
-                            <h:commandButton value=" Preuzmi " action="#{odabirIoTPrognoza.odaberiUredajeZaPracenje()}">
+                            <h:commandButton value=" Preuzmi " action="#{odabirIoTPrognoza.odaberiUredajeZaPracenje()}" >
                                 <f:ajax execute="raspoloziviIoT" render="odabraniIoT raspoloziviIoT" />
                             </h:commandButton><br/>
                             <h:commandButton value=" Vrati " action="#{odabirIoTPrognoza.vratiUredaje()}">
-                                <f:ajax execute="odabraniIoT" render="odabraniIoT raspoloziviIoT" />
+                                <f:ajax execute="odabraniIoT" render="odabraniIoT raspoloziviIoT tablicaMeteo" />
                             </h:commandButton><br/>
-                            <h:commandButton value=" Ažuriraj " action="preuzmi"/><br/>
+                            <h:commandButton value=" Ažuriraj "  action="#{odabirIoTPrognoza.azurirajIoTUredaj()}">
+                                <f:ajax execute="@this raspoloziviIoT" render="@form" />
+                            </h:commandButton>
                         </h:panelGroup>
                         <h:selectManyListbox id="odabraniIoT" value="#{odabirIoTPrognoza.popisOdabraniIoT}" size="7">
                             <f:selectItems value="#{odabirIoTPrognoza.odabraniIoT}" var="i" itemLabel="#{i.labela}" itemValue="#{i.vrijednost}"/>
                         </h:selectManyListbox>
                         <h:commandButton id="pregledPrognoza" value="#{odabirIoTPrognoza.gumbPregledPrognoza}" action="#{odabirIoTPrognoza.dohvatiPrognozuZaOdabraneIoT()}">
-                            <f:ajax execute="odabraniIoT" render="tablicaMeteo" />
+                            <f:ajax execute="odabraniIoT" render="@form" />
                         </h:commandButton><br/>
                     </h:panelGrid>
+                    <h:panelGrid  id="grupaAzuriranje" rendered="#{odabirIoTPrognoza.prikazAzuriraj}">
+                        <h:outputLabel for="azurirajId" value="ID:"/>
+                        <h:inputText id="azurirajId" value="#{odabirIoTPrognoza.azurirajId}"/>
+                        <h:outputText value=""/>
+                        <h:outputLabel for="azurirajNaziv" value="Naziv:"/>
+                        <h:inputText id="azurirajNaziv" value="#{odabirIoTPrognoza.azurirajNaziv}"/>
+                        <h:outputText value=""/>
+                        <h:outputLabel for="azurirajAdresa" value="Adresa:"/>
+                        <h:inputText id="azurirajAdresa" value="#{odabirIoTPrognoza.azurirajAdresa}"/>
+                        <h:commandButton value=" Ažuriraj IoT uređaj " action="#{odabirIoTPrognoza.azurirajIoTUredaj()}">
+                            <f:ajax execute="azurirajId azurirajNaziv azurirajAdresa" render="raspoloziviIoT"/>
+                        </h:commandButton>    
+                    </h:panelGrid>
                     <h:panelGrid id="grupaMeteo">
-                        <p:dataTable id="tablicaMeteo" var="meteo" value="#{odabirIoTPrognoza.meteoPronoze}" paginator="true" rows="8">
+                        <p:dataTable id="tablicaMeteo" var="meteo" value="#{odabirIoTPrognoza.meteoPronoze}" paginator="true" rows="8" rendered="#{odabirIoTPrognoza.prikazTablica}">
                             <p:column headerText="id uređaja">
                                 <h:outputText value="#{meteo.id}" />
                             </p:column>

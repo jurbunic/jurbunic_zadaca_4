@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 import javax.ejb.EJB;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
@@ -59,13 +60,17 @@ public class OdabirIoTPrognoza implements Serializable {
     private List<Uredaji> raspIoT;
     private List<Uredaji> odabIoT = new ArrayList<>();
 
+    private boolean prikazTablica = false;
+    private boolean prikazAzuriraj = false;
+
     private String dnevnikIp;
     private String dnevnikUrl;
+
     /**
      * Creates a new instance of OdabirIoTPrognoza
      */
     public OdabirIoTPrognoza() {
-        HttpServletRequest httpServletRequest = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();  
+        HttpServletRequest httpServletRequest = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
         dnevnikIp = httpServletRequest.getRemoteAddr();
         dnevnikUrl = httpServletRequest.getRequestURI();
     }
@@ -76,10 +81,29 @@ public class OdabirIoTPrognoza implements Serializable {
         Uredaji uredaj = new Uredaji(Integer.parseInt(noviId), noviNaziv, Float.parseFloat(lok.getLatitude()), Float.parseFloat(lok.getLongitude()), 0, new Date(), new Date());
         uredajiFacade.create(uredaj);
         preuzmiRaspoloziveIoT();
-        long ukupno = System.currentTimeMillis()-pocetak;
+        long ukupno = System.currentTimeMillis() - pocetak;
         Integer trajanje = (int) ukupno;
         dnevnikFacade.create(new Dnevnik(null, "localhost", dnevnikUrl, dnevnikIp, trajanje, 1));
         return "";
+    }
+
+    public void azurirajIoTUredaj() {
+        if (prikazAzuriraj) {
+            prikazAzuriraj = false;
+        } else {
+            prikazAzuriraj = true;
+            Uredaji uredaj = null;
+            Integer id = Integer.valueOf(popisRaspoloziviIoT.get(0));
+            for (int i = 0; i < raspoloziviIoT.size(); i++) {
+                if (raspoloziviIoT.get(i).getVrijednost().compareTo(popisRaspoloziviIoT.get(0)) == 0) {
+                    uredaj = raspIoT.get(i);
+                    break;
+                }
+            }
+            azurirajId = uredaj.getId().toString();
+            azurirajNaziv = uredaj.getNaziv();
+            azurirajAdresa = reverznoGeokodiranje(String.valueOf(uredaj.getLatitude()), String.valueOf(uredaj.getLongitude()));
+        }
     }
 
     private void preuzmiRaspoloziveIoT() {
@@ -95,11 +119,16 @@ public class OdabirIoTPrognoza implements Serializable {
         for (int i = 0; i < popisOdabraniIoT.size(); i++) {
             for (int j = 0; j < odabraniIoT.size(); j++) {
                 if (odabraniIoT.get(j).getVrijednost().compareTo(popisOdabraniIoT.get(i)) == 0) {
+                    int k = 0;
                     raspoloziviIoT.add(odabraniIoT.get(j));
                     raspIoT.add(odabIoT.get(j));
                     odabIoT.remove(j);
-                    odabraniIoT.remove(j);                  
-                    if(ukupno==odabraniIoT.size()){
+                    odabraniIoT.remove(j);
+                    k++;
+                    if (ukupno == k) {
+                        if (odabraniIoT.isEmpty()) {
+                            prikazTablica = false;
+                        }
                         return;
                     }
                 }
@@ -108,6 +137,7 @@ public class OdabirIoTPrognoza implements Serializable {
     }
 
     public void odaberiUredajeZaPracenje() {
+        prikazTablica = true;
         int ukupno = popisRaspoloziviIoT.size();
         for (int i = 0; i < popisRaspoloziviIoT.size(); i++) {
             for (int j = 0; j < raspoloziviIoT.size(); j++) {
@@ -126,16 +156,37 @@ public class OdabirIoTPrognoza implements Serializable {
 
     public void dohvatiPrognozuZaOdabraneIoT() {
         meteoPronoze.clear();
-        GMKlijent gmk = new GMKlijent();       
+        GMKlijent gmk = new GMKlijent();
         for (int i = 0; i < popisOdabraniIoT.size(); i++) {
-            String adresa = gmk.reverseGeocoding(String.valueOf(odabIoT.get(0).getLatitude()), String.valueOf(odabIoT.get(0).getLongitude()));
+            String adresa = reverznoGeokodiranje(String.valueOf(odabIoT.get(0).getLatitude()), String.valueOf(odabIoT.get(0).getLongitude()));
             MeteoPrognoza[] mp = meteoIoTKlijent.dajMeteoPrognoze(Integer.valueOf(popisOdabraniIoT.get(i)), adresa);
             meteoPronoze.addAll(Arrays.asList(mp));
         }
 
     }
 
+    private String reverznoGeokodiranje(String lat, String log) {
+        GMKlijent gmk = new GMKlijent();
+        return gmk.reverseGeocoding(lat, log);
+    }
+
     // ------- Getteri & Setteri -----------
+    public boolean isPrikazTablica() {
+        return prikazTablica;
+    }
+
+    public void setPrikazTablica(boolean prikazTablica) {
+        this.prikazTablica = prikazTablica;
+    }
+
+    public boolean isPrikazAzuriraj() {
+        return prikazAzuriraj;
+    }
+
+    public void setPrikazAzuriraj(boolean prikazAzuriraj) {
+        this.prikazAzuriraj = prikazAzuriraj;
+    }
+
     public String getNoviId() {
         return noviId;
     }
