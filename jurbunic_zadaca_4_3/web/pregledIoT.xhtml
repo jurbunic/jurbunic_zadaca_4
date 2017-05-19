@@ -54,7 +54,7 @@
                             <h:commandButton value=" Vrati " action="#{odabirIoTPrognoza.vratiUredaje()}">
                                 <f:ajax execute="odabraniIoT" render="odabraniIoT raspoloziviIoT tablicaMeteo" />
                             </h:commandButton><br/>
-                            <h:commandButton value=" Ažuriraj "  action="#{odabirIoTPrognoza.azurirajIoTUredaj()}">
+                            <h:commandButton value=" Ažuriraj "  action="#{odabirIoTPrognoza.prikaziFormuZaAzuriranje()}">
                                 <f:ajax execute="@this raspoloziviIoT" render="@form" />
                             </h:commandButton>
                         </h:panelGroup>
@@ -74,7 +74,7 @@
                         <h:outputText value=""/>
                         <h:outputLabel for="azurirajAdresa" value="Adresa:"/>
                         <h:inputText id="azurirajAdresa" value="#{odabirIoTPrognoza.azurirajAdresa}"/>
-                        <h:commandButton value=" Ažuriraj IoT uređaj " action="#{odabirIoTPrognoza.azurirajIoTUredaj()}">
+                        <h:commandButton value=" Ažuriraj IoT uređaj " action="#{odabirIoTPrognoza.azurirajUredaj()}" >
                             <f:ajax execute="azurirajId azurirajNaziv azurirajAdresa" render="raspoloziviIoT"/>
                         </h:commandButton>    
                     </h:panelGrid>
