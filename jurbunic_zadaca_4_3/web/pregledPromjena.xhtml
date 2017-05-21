@@ -25,30 +25,32 @@
             </ui:define>
 
             <ui:define name="content">
-                <h:panelGroup>
-                    <h4>Filtriranje</h4><br/><br/>
-                    <h:outputLabel value="ID" />
-                    <h:inputText id="txtId" value="#{pregledPromjena.filterId}" /><br/>
-                    <h:outputLabel value="Naziv" />
-                    <h:inputText id="txtNaziv" value="#{pregledPromjena.filterNaziv}" />
-                    <h:commandButton value="Filtriraj" action="#{pregledPromjena.filtriraj()}">
-                        <f:ajax execute="txtId txtNaziv" render="tablicaPromjena" />
-                    </h:commandButton>
-                </h:panelGroup>
-                <p:dataTable id="tablicaPromjena" var="promjena" value="#{pregledPromjena.listaPromjene}" paginator="true" rows="8">
-                    <p:column headerText="ID">
-                        <h:outputText value="#{promjena.pid}" />
-                    </p:column>
-                    <p:column headerText="Naziv">
-                        <h:outputText value="#{promjena.naziv}" />
-                    </p:column>
-                    <p:column headerText="Vrijeme promjene">
-                        <h:outputText value="#{promjena.vrijemePromjene}" />
-                    </p:column>
-                    <p:column headerText="Status">
-                        <h:outputText value="#{promjena.status}" />
-                    </p:column>
-                </p:dataTable>
+                <h:form>   
+                    <h:panelGroup>
+                        <h4>Filtriranje</h4><br/><br/>
+                        <h:outputLabel value="ID" />
+                        <h:inputText id="txtId" value="#{pregledPromjena.filterId}" /><br/>
+                        <h:outputLabel value="Naziv" />
+                        <h:inputText id="txtNaziv" value="#{pregledPromjena.filterNaziv}" />
+                        <h:commandButton value="Filtriraj" action="#{pregledPromjena.filtriraj()}">
+                            <f:ajax execute="txtId txtNaziv" render="@form" />
+                        </h:commandButton>
+                    </h:panelGroup>              
+                    <p:dataTable id="tablicaPromjena" var="promjena" value="#{pregledPromjena.listaPromjene}" paginator="true" rows="8">
+                        <p:column headerText="ID">
+                            <h:outputText value="#{promjena.id}" />
+                        </p:column>
+                        <p:column headerText="Naziv">
+                            <h:outputText value="#{promjena.naziv}" />
+                        </p:column>
+                        <p:column headerText="Vrijeme promjene">
+                            <h:outputText value="#{promjena.vrijemePromjene}" />
+                        </p:column>
+                        <p:column headerText="Status">
+                            <h:outputText value="#{promjena.status}" />
+                        </p:column>
+                    </p:dataTable>
+                </h:form> 
             </ui:define>
 
         </ui:composition>

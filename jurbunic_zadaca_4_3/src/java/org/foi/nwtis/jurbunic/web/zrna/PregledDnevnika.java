@@ -10,7 +10,6 @@ import javax.enterprise.context.SessionScoped;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 import javax.ejb.EJB;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
@@ -55,18 +54,9 @@ public class PregledDnevnika implements Serializable {
     }
 
     public void filtriraj() {
-        prikazDnevnik.clear();
-        prikazDnevnik.addAll(listaDnevnik);
-        if (!filterKorisnik.isEmpty() && filterKorisnik != null) {
-            prikazDnevnik = prikazDnevnik.stream().filter(p -> p.getKorisnik().compareTo(filterKorisnik) == 0).collect(Collectors.toList());
-        }if(!filterIpadresa.isEmpty() && filterIpadresa != null) {
-            prikazDnevnik = prikazDnevnik.stream().filter(p -> p.getIpadresa().compareTo(filterIpadresa) == 0).collect(Collectors.toList());
-        }if(!filterStatus.isEmpty() && filterStatus != null){
-            prikazDnevnik = prikazDnevnik.stream().filter(p -> p.getStatus() == Integer.valueOf(filterStatus)).collect(Collectors.toList());
-        }if(!filterTrajanje.isEmpty() && filterTrajanje != null){
-            prikazDnevnik = prikazDnevnik.stream().filter(p -> p.getTrajanje() == Integer.valueOf(filterTrajanje)).collect(Collectors.toList());
-        }
+        prikazDnevnik = dnevnikFacade.filtriranje(filterKorisnik, filterIpadresa, filterTrajanje, filterStatus);
     }
+    
     //----------- Getter & Setter -------------
 
     public List<Dnevnik> getPrikazDnevnik() {

@@ -29,27 +29,30 @@ public class PregledPromjena implements Serializable {
     private List<Promjene> listaPromjene;
     private Integer filterId;
     private String filterNaziv;
-    
+
     private String dnevnikIp;
     private String dnevnikKorisnik;
-    
+
     private FacesContext ctx;
+
     /**
      * Creates a new instance of PregledPromjena
      */
     public PregledPromjena() {
-        HttpServletRequest httpServletRequest = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();  
-        dnevnikIp = httpServletRequest.getRemoteAddr(); 
+        HttpServletRequest httpServletRequest = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
+        dnevnikIp = httpServletRequest.getRemoteAddr();
     }
-    
-    public void filtriraj(){
 
+    public void filtriraj() {
+        listaPromjene = promjeneFacade.filtriranje(filterId, filterNaziv);
     }
-    
+
     // -------- Getter & Setter ----------------
-
     public List<Promjene> getListaPromjene() {
-        listaPromjene = promjeneFacade.findAll();
+        if (listaPromjene == null) {
+            listaPromjene = promjeneFacade.findAll();
+        }
+
         return listaPromjene;
     }
 
@@ -72,5 +75,5 @@ public class PregledPromjena implements Serializable {
     public void setFilterNaziv(String filterNaziv) {
         this.filterNaziv = filterNaziv;
     }
-    
+
 }
