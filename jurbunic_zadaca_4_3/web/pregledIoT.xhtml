@@ -49,10 +49,10 @@
                         </h:selectManyListbox>
                         <h:panelGroup>
                             <h:commandButton value=" Preuzmi " action="#{odabirIoTPrognoza.odaberiUredajeZaPracenje()}" >
-                                <f:ajax execute="raspoloziviIoT" render="odabraniIoT raspoloziviIoT" />
+                                <f:ajax execute="raspoloziviIoT" render="odabraniIoT raspoloziviIoT pregledPrognoza" />
                             </h:commandButton><br/>
                             <h:commandButton value=" Vrati " action="#{odabirIoTPrognoza.vratiUredaje()}">
-                                <f:ajax execute="odabraniIoT" render="odabraniIoT raspoloziviIoT tablicaMeteo" />
+                                <f:ajax execute="odabraniIoT" render="odabraniIoT raspoloziviIoT tablicaMeteo pregledPrognoza" />
                             </h:commandButton><br/>
                             <h:commandButton value=" Ažuriraj "  action="#{odabirIoTPrognoza.prikaziFormuZaAzuriranje()}">
                                 <f:ajax execute="@this raspoloziviIoT" render="@form" />
@@ -61,9 +61,11 @@
                         <h:selectManyListbox id="odabraniIoT" value="#{odabirIoTPrognoza.popisOdabraniIoT}" size="7">
                             <f:selectItems value="#{odabirIoTPrognoza.odabraniIoT}" var="i" itemLabel="#{i.labela}" itemValue="#{i.vrijednost}"/>
                         </h:selectManyListbox>
-                        <h:commandButton id="pregledPrognoza" value="#{odabirIoTPrognoza.gumbPregledPrognoza}" action="#{odabirIoTPrognoza.dohvatiPrognozuZaOdabraneIoT()}">
+                        <h:panelGroup id="pregledPrognoza">
+                        <h:commandButton id="pregledPrognozaGumb" rendered="#{odabirIoTPrognoza.prikazGumb}" value="#{odabirIoTPrognoza.gumbPregledPrognoza}" action="#{odabirIoTPrognoza.dohvatiPrognozuZaOdabraneIoT()}">
                             <f:ajax execute="odabraniIoT" render="@form" />
                         </h:commandButton><br/>
+                        </h:panelGroup>
                     </h:panelGrid>
                     <h:panelGrid  id="grupaAzuriranje" rendered="#{odabirIoTPrognoza.prikazAzuriraj}">
                         <h:outputLabel for="azurirajId" value="ID:"/>

@@ -9,6 +9,7 @@ import javax.inject.Named;
 import javax.enterprise.context.SessionScoped;
 import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.faces.context.FacesContext;
@@ -26,45 +27,52 @@ public class PregledDnevnika implements Serializable {
 
     @EJB
     private DnevnikFacade dnevnikFacade;
-    private List<Dnevnik> listaDnevnik;
-    private List<Dnevnik> prikazDnevnik;
+    private List<Dnevnik> prikazDnevnik = new ArrayList<>();
     private String filterKorisnik;
     private String filterIpadresa;
     private String filterTrajanje;
     private String filterStatus;
-    private boolean isChanged = true;
     private int brojUnosa=0;
     private String dnevnikIp;
+    private String dnevnikUrl;
     /**
      * Creates a new instance of PregledDnevnika
      */
     public PregledDnevnika() {
         HttpServletRequest httpServletRequest = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();  
         dnevnikIp = httpServletRequest.getRemoteAddr(); 
+        dnevnikUrl = httpServletRequest.getRequestURI();
     }
 
-    private void dohvatiDnevnik() {
-        isChanged = false;
-        listaDnevnik = dnevnikFacade.findAll();
-        brojUnosa = listaDnevnik.size();
-        prikazDnevnik = new ArrayList<>();
-        prikazDnevnik.addAll(listaDnevnik);
-        
-
-    }
-
+    /**
+     * Metoda poziva filtriranje rezultata i zapisuje u listu za prikaz dnevnika, filtrirane rezultate
+     */
     public void filtriraj() {
+        long pocetak = System.currentTimeMillis();
         prikazDnevnik = dnevnikFacade.filtriranje(filterKorisnik, filterIpadresa, filterTrajanje, filterStatus);
+        long ukupno = System.currentTimeMillis()- pocetak;
+        zapisiUDnevnik(ukupno);
     }
     
+     /**
+     * Metoda zapisuje u aktivnosti korisnika u dnevnik. Potrebno je izračunati
+     * vrijeme trajanja aktivnosti prije nego se poziva metoda. Korisnička
+     * akcija se potom zapisuje u entitet Dnevnik.
+     *
+     * @param ukupnoTrajanje trajanje korisničke aktivnosti
+     */
+    public void zapisiUDnevnik(long ukupnoTrajanje) {
+        Integer trajanje = (int) ukupnoTrajanje;
+        Dnevnik d = new Dnevnik(null, "jurbunic", dnevnikUrl, dnevnikIp, trajanje, 1);
+        d.setVrijeme(new Date());
+        dnevnikFacade.create(d);
+    }
     //----------- Getter & Setter -------------
 
     public List<Dnevnik> getPrikazDnevnik() {
-        if(brojUnosa != dnevnikFacade.count()){
-            isChanged=true;
-        }
-        if(isChanged){
-            dohvatiDnevnik();
+        brojUnosa = dnevnikFacade.count();
+        if(brojUnosa != prikazDnevnik.size()){
+            prikazDnevnik = dnevnikFacade.findAll();
         }
         return prikazDnevnik;
     }

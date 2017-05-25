@@ -46,7 +46,7 @@ public class OdabirIoTPrognoza implements Serializable {
 
     @EJB
     private UredajiFacade uredajiFacade;
-    
+
     private String noviId;
     private String noviNaziv;
     private String noviAdresa;
@@ -67,6 +67,7 @@ public class OdabirIoTPrognoza implements Serializable {
 
     private boolean prikazTablica = false;
     private boolean prikazAzuriraj = false;
+    private boolean prikazGumb = false;
 
     private String dnevnikIp;
     private String dnevnikUrl;
@@ -79,10 +80,12 @@ public class OdabirIoTPrognoza implements Serializable {
         dnevnikIp = httpServletRequest.getRemoteAddr();
         dnevnikUrl = httpServletRequest.getRequestURI();
     }
+
     /**
-     * Metoda dodaje novi uređaj u entitet Uredaji. Zapisuje se novi IoT uređaj sa
-     * vrijednostima koje je korisnik unio na formi za unos novog uređaja.
-     * @return 
+     * Metoda dodaje novi uređaj u entitet Uredaji. Zapisuje se novi IoT uređaj
+     * sa vrijednostima koje je korisnik unio na formi za unos novog uređaja.
+     *
+     * @return
      */
     public String dodajIoTUredaj() {
         long pocetak = System.currentTimeMillis();
@@ -97,41 +100,42 @@ public class OdabirIoTPrognoza implements Serializable {
         dnevnikFacade.create(d);
         return "";
     }
-    
+
     /**
-     * Metoda zapisuje promjenu koja je načinjena nad nekim uređajem. Promjena se
-     * zapisuje u entitet Promjene. 
+     * Metoda zapisuje promjenu koja je načinjena nad nekim uređajem. Promjena
+     * se zapisuje u entitet Promjene.
+     *
      * @param promjenjeniUredaj uređaj nad kojim je promjenjen
      */
-    public void zapisiPromjenu(Uredaji promjenjeniUredaj){       
+    public void zapisiPromjenu(Uredaji promjenjeniUredaj) {
         Promjene p = new Promjene(null, promjenjeniUredaj.getId(),
                 promjenjeniUredaj.getNaziv(), promjenjeniUredaj.getLatitude(),
                 promjenjeniUredaj.getLongitude(), promjenjeniUredaj.getStatus(),
                 promjenjeniUredaj.getVrijemePromjene(), promjenjeniUredaj.getVrijemeKreiranja());
         promjeneFacade.create(p);
     }
-    
+
     /**
-     * Metoda zapisuje u aktivnosti korisnika u dnevnik. Potrebno je izračunati 
-     * vrijeme trajanja aktivnosti prije nego se poziva metoda. Korisnička akcija 
-     * se potom zapisuje u entitet Dnevnik.
-     * 
+     * Metoda zapisuje u aktivnosti korisnika u dnevnik. Potrebno je izračunati
+     * vrijeme trajanja aktivnosti prije nego se poziva metoda. Korisnička
+     * akcija se potom zapisuje u entitet Dnevnik.
+     *
      * @param ukupnoTrajanje trajanje korisničke aktivnosti
      */
-    public void zapisiUDnevnik(long ukupnoTrajanje){
+    public void zapisiUDnevnik(long ukupnoTrajanje) {
         Integer trajanje = (int) ukupnoTrajanje;
-        Dnevnik d = new Dnevnik(null, "localhost", dnevnikUrl, dnevnikIp, trajanje, 1);
+        Dnevnik d = new Dnevnik(null, "jurbunic", dnevnikUrl, dnevnikIp, trajanje, 1);
         d.setVrijeme(new Date());
         dnevnikFacade.create(d);
     }
-    
+
     /**
-     * Metoda ažurira uređaj koji je odabran i prikazan na formi. Metoda radi na način
-     * da uređaj koji se ažurira prvo izbriše iz entiteta Uređaji te se ponovno zapiše
-     * sa promijenjenim vrijednostima. Promjena se zapisuje i u entitet Promjene i
-     * u entitet Dnevnik.
+     * Metoda ažurira uređaj koji je odabran i prikazan na formi. Metoda radi na
+     * način da uređaj koji se ažurira prvo izbriše iz entiteta Uređaji te se
+     * ponovno zapiše sa promijenjenim vrijednostima. Promjena se zapisuje i u
+     * entitet Promjene i u entitet Dnevnik.
      */
-    public void azurirajUredaj(){
+    public void azurirajUredaj() {
         long pocetak = System.currentTimeMillis();
         GMKlijent gmk = new GMKlijent();
         Lokacija l = gmk.getGeoLocation(azurirajAdresa);
@@ -143,11 +147,11 @@ public class OdabirIoTPrognoza implements Serializable {
         zapisiUDnevnik(ukupno);
         zapisiPromjenu(azuriraniUredaj);
     }
-    
+
     /**
-     * Metoda služi za prikaz forme za ažuriranje. Ako nije odabran nijedan uređaj
-     * iz raspoloživih uređaja tada se forma ne pokazuje, inače se zapisuje vrijednosti
-     * odabranog uređaja u varijable za inputText na formi.
+     * Metoda služi za prikaz forme za ažuriranje. Ako nije odabran nijedan
+     * uređaj iz raspoloživih uređaja tada se forma ne pokazuje, inače se
+     * zapisuje vrijednosti odabranog uređaja u varijable za inputText na formi.
      */
     public void prikaziFormuZaAzuriranje() {
         if (prikazAzuriraj) {
@@ -167,10 +171,10 @@ public class OdabirIoTPrognoza implements Serializable {
             azurirajAdresa = reverznoGeokodiranje(String.valueOf(uredajZaAzuriranje.getLatitude()), String.valueOf(uredajZaAzuriranje.getLongitude()));
         }
     }
-    
+
     /**
-     * Metoda preuzima sve raspoložive uređaje iz entiteta Uređaji pa ih zapisuje
-     * u listu raspoloživih uređaja. Akcija se zapisuje u dnevnik
+     * Metoda preuzima sve raspoložive uređaje iz entiteta Uređaji pa ih
+     * zapisuje u listu raspoloživih uređaja. Akcija se zapisuje u dnevnik
      */
     private void preuzmiRaspoloziveIoT() {
         long pocetak = System.currentTimeMillis();
@@ -179,16 +183,17 @@ public class OdabirIoTPrognoza implements Serializable {
         for (Uredaji u : raspIoT) {
             raspoloziviIoT.add(new Izbornik(u.getNaziv(), u.getId().toString()));
         }
-        long ukupno = System.currentTimeMillis()-pocetak;
+        long ukupno = System.currentTimeMillis() - pocetak;
         zapisiUDnevnik(ukupno);
     }
-    
+
     /**
      * Metoda sluzi za prebacivanje iz uređaja iz odabranih uređaja za praćenje
-     * u raspoložive uređaje. Kada je prebačeno onoliko uređaja koliko je odabrano
-     * tada se prekida petlja da se smanji broj iteracija petlje
+     * u raspoložive uređaje. Kada je prebačeno onoliko uređaja koliko je
+     * odabrano tada se prekida petlja da se smanji broj iteracija petlje
      */
     public void vratiUredaje() {
+        long pocetak = System.currentTimeMillis();
         int ukupno = popisOdabraniIoT.size();
         for (int i = 0; i < popisOdabraniIoT.size(); i++) {
             for (int j = 0; j < odabraniIoT.size(); j++) {
@@ -202,21 +207,28 @@ public class OdabirIoTPrognoza implements Serializable {
                     if (ukupno == k) {
                         if (odabraniIoT.isEmpty()) {
                             prikazTablica = false;
+                            prikazGumb = false;
                         }
+                        long kraj = System.currentTimeMillis() - pocetak;
+                        zapisiUDnevnik(kraj);
                         return;
                     }
                 }
             }
         }
+        long kraj = System.currentTimeMillis() - pocetak;
+        zapisiUDnevnik(kraj);
     }
 
     /**
-     * Metoda sluzi za prebacivanje uređaja iz raspoloživih uređaja u listu uređaja
-     * za praćenje. Kada je prebačeno onoliko uređaja koliko je odabrano
+     * Metoda sluzi za prebacivanje uređaja iz raspoloživih uređaja u listu
+     * uređaja za praćenje. Kada je prebačeno onoliko uređaja koliko je odabrano
      * tada se prekida petlja da se smanji broj iteracija petlje
      */
     public void odaberiUredajeZaPracenje() {
+        long pocetak = System.currentTimeMillis();
         prikazTablica = true;
+        prikazGumb = true;
         int ukupno = popisRaspoloziviIoT.size();
         for (int i = 0; i < popisRaspoloziviIoT.size(); i++) {
             for (int j = 0; j < raspoloziviIoT.size(); j++) {
@@ -226,34 +238,54 @@ public class OdabirIoTPrognoza implements Serializable {
                     raspIoT.remove(j);
                     raspoloziviIoT.remove(j);
                     if (ukupno == odabraniIoT.size()) {
+                        long kraj = System.currentTimeMillis() - pocetak;
+                        zapisiUDnevnik(kraj);
                         return;
                     }
                 }
             }
         }
+        long kraj = System.currentTimeMillis() - pocetak;
+        zapisiUDnevnik(kraj);
     }
+
     /**
-     * Metoda dohvaća prognozu za sve uređaje u listi odabranih uređaja za praćenje.
-     * Adresa se dobiva reverznim geokodiranjem. Dobivene prognoze se spremaju u 
-     * polje meteo prognoza
+     * Metoda dohvaća prognozu za sve uređaje u listi odabranih uređaja za
+     * praćenje. Adresa se dobiva reverznim geokodiranjem. Dobivene prognoze se
+     * spremaju u polje meteo prognoza
      */
     public void dohvatiPrognozuZaOdabraneIoT() {
+        long pocetak = System.currentTimeMillis();
+        if(gumbPregledPrognoza.compareTo("Zatvori prognoze")==0){
+            gumbPregledPrognoza = "Pregled prognoza";
+            prikazTablica = false;
+            return;
+        }
+        prikazTablica = true;
         meteoPronoze.clear();
+        odabIoT.size();
         for (int i = 0; i < odabIoT.size(); i++) {
             String adresa = reverznoGeokodiranje(String.valueOf(odabIoT.get(0).getLatitude()), String.valueOf(odabIoT.get(0).getLongitude()));
-            MeteoPrognoza[] mp = meteoIoTKlijent.dajMeteoPrognoze(Integer.valueOf(popisOdabraniIoT.get(i)), adresa);
+            MeteoPrognoza[] mp = meteoIoTKlijent.dajMeteoPrognoze(Integer.valueOf(odabIoT.get(i).getId()), adresa);
             meteoPronoze.addAll(Arrays.asList(mp));
         }
-
+        gumbPregledPrognoza = "Zatvori prognoze";
+        long ukupno = System.currentTimeMillis() - pocetak;
+        zapisiUDnevnik(ukupno);
     }
+
     /**
      * Metoda služi za pretvaranje longitude i latitude u adresu.
-     * @param lat 
+     *
+     * @param lat
      * @param log
      * @return adresa sa zadanim lat i log
      */
     private String reverznoGeokodiranje(String lat, String log) {
+        long pocetak = System.currentTimeMillis();
         GMKlijent gmk = new GMKlijent();
+        long ukupno = System.currentTimeMillis() - pocetak;
+        zapisiUDnevnik(ukupno);
         return gmk.reverseGeocoding(lat, log);
     }
 
@@ -389,4 +421,12 @@ public class OdabirIoTPrognoza implements Serializable {
         this.meteoPronoze = meteoPronoze;
     }
 
+    public boolean isPrikazGumb() {
+        return prikazGumb;
+    }
+
+    public void setPrikazGumb(boolean prikazGumb) {
+        this.prikazGumb = prikazGumb;
+    }
+    
 }
