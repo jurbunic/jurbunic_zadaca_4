@@ -27,14 +27,17 @@ public class PregledDnevnika implements Serializable {
 
     @EJB
     private DnevnikFacade dnevnikFacade;
-    private List<Dnevnik> prikazDnevnik = new ArrayList<>();
+    private List<Dnevnik> prikazDnevnik;
     private String filterKorisnik;
     private String filterIpadresa;
     private String filterTrajanje;
     private String filterStatus;
+    private Date filterOdDatuma;
+    private Date filterDoDatuma;
     private int brojUnosa=0;
     private String dnevnikIp;
     private String dnevnikUrl;
+    
     /**
      * Creates a new instance of PregledDnevnika
      */
@@ -49,7 +52,7 @@ public class PregledDnevnika implements Serializable {
      */
     public void filtriraj() {
         long pocetak = System.currentTimeMillis();
-        prikazDnevnik = dnevnikFacade.filtriranje(filterKorisnik, filterIpadresa, filterTrajanje, filterStatus);
+        prikazDnevnik = dnevnikFacade.filtriranje(filterKorisnik, filterIpadresa, filterTrajanje, filterStatus, filterOdDatuma, filterDoDatuma);
         long ukupno = System.currentTimeMillis()- pocetak;
         zapisiUDnevnik(ukupno);
     }
@@ -70,8 +73,7 @@ public class PregledDnevnika implements Serializable {
     //----------- Getter & Setter -------------
 
     public List<Dnevnik> getPrikazDnevnik() {
-        brojUnosa = dnevnikFacade.count();
-        if(brojUnosa != prikazDnevnik.size()){
+        if(prikazDnevnik==null){
             prikazDnevnik = dnevnikFacade.findAll();
         }
         return prikazDnevnik;
@@ -113,6 +115,19 @@ public class PregledDnevnika implements Serializable {
         this.filterStatus = filterStatus;
     }
 
-    
+    public Date getFilterOdDatuma() {
+        return filterOdDatuma;
+    }
 
+    public void setFilterOdDatuma(Date filterOdDatuma) {
+        this.filterOdDatuma = filterOdDatuma;
+    }
+
+    public Date getFilterDoDatuma() {
+        return filterDoDatuma;
+    }
+
+    public void setFilterDoDatuma(Date filterDoDatuma) {
+        this.filterDoDatuma = filterDoDatuma;
+    }
 }

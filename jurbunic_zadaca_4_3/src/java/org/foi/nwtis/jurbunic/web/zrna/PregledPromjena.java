@@ -40,8 +40,6 @@ public class PregledPromjena implements Serializable {
     private String dnevnikIp;
     private String dnevnikUrl;
 
-    private FacesContext ctx;
-
     /**
      * Creates a new instance of PregledPromjena
      */

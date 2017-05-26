@@ -35,9 +35,13 @@
                         <h:outputLabel value="Trajanje" />
                         <h:inputText id="txtTrajanje" value="#{pregledDnevnika.filterTrajanje}" /><br/>
                         <h:outputLabel value="Status" />
-                        <h:inputText id="txtStatus" value="#{pregledDnevnika.filterStatus}" />
+                        <h:inputText id="txtStatus" value="#{pregledDnevnika.filterStatus}" /><br/>
+                        <h:outputLabel value="Od datuma:" />
+                        <p:calendar id="txtOdDatuma" value="#{pregledDnevnika.filterOdDatuma}"/><br/>
+                        <h:outputLabel value="Do datuma:" />
+                        <p:calendar id="txtDoDatuma" value="#{pregledDnevnika.filterDoDatuma}"/><br/><br/>
                         <h:commandButton value="Filtriraj" action="#{pregledDnevnika.filtriraj()}">
-                            <f:ajax execute="txtKorisnik txtIpadresa txtTrajanje txtStatus" render="tablicaDnevnik" />
+                            <f:ajax execute="txtKorisnik txtIpadresa txtTrajanje txtStatus txtOdDatuma txtDoDatuma" render="tablicaDnevnik" />
                         </h:commandButton>
                     </h:panelGroup>
                     <p:dataTable id="tablicaDnevnik" var="dnevnik" value="#{pregledDnevnika.prikazDnevnik}" paginator="true" rows="8">
