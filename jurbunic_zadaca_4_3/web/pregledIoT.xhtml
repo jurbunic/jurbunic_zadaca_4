@@ -77,8 +77,10 @@
                         <h:outputLabel for="azurirajAdresa" value="Adresa:"/>
                         <h:inputText id="azurirajAdresa" value="#{odabirIoTPrognoza.azurirajAdresa}"/>
                         <h:commandButton value=" Ažuriraj IoT uređaj " action="#{odabirIoTPrognoza.azurirajUredaj()}" >
-                            <f:ajax execute="azurirajId azurirajNaziv azurirajAdresa" render="raspoloziviIoT"/>
-                        </h:commandButton>    
+                            <f:ajax execute="azurirajId azurirajNaziv azurirajAdresa" render="raspoloziviIoT grupaAzuriranje"/>
+                        </h:commandButton>
+                        <br/>
+                        <h:outputText id="azurirajStatus" value="#{odabirIoTPrognoza.azuriranjeStatus}"/>
                     </h:panelGrid>
                     <h:panelGrid id="grupaMeteo">
                         <p:dataTable id="tablicaMeteo" var="meteo" value="#{odabirIoTPrognoza.meteoPronoze}" paginator="true" rows="8" rendered="#{odabirIoTPrognoza.prikazTablica}">
@@ -87,6 +89,9 @@
                             </p:column>
                             <p:column headerText="dan u tjednu">
                                 <h:outputText value="#{meteo.dan}" />
+                            </p:column>
+                            <p:column headerText="Zadnje mjereno">
+                                <h:outputText value="#{meteo.prognoza.lastUpdate}"/>
                             </p:column>
                             <p:column headerText="temperatura">
                                 <h:outputText value="#{meteo.prognoza.temperatureValue}" />

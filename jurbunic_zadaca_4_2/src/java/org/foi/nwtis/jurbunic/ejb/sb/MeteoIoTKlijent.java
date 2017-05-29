@@ -22,7 +22,7 @@ public class MeteoIoTKlijent {
 
     // Add business logic below. (Right-click in editor and choose
     // "Insert Code > Add Business Method")
-    private String apiKey = "8a137f80e58000b8bd42ee309da78b11";
+    private String apiKey = "";
 
     public void postaviKorisnickePodatke(String apiKey) {
         this.apiKey = apiKey;

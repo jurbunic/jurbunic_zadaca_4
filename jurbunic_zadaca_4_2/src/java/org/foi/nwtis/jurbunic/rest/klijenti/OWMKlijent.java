@@ -94,7 +94,7 @@ public class OWMKlijent {
     }
 
     public MeteoPrognoza[] getWeatherForecast(int id, String latitude, String longitude) {
-        List<MeteoPrognoza> mpr = new ArrayList<>();   
+        List<MeteoPrognoza> mpr = new ArrayList<>();
         WebTarget webResource = client.target(OWMRESTHelper.getOWM_BASE_URI())
                 .path(OWMRESTHelper.getOWM_Forecast_Path());
         webResource = webResource.queryParam("lat", latitude);
@@ -104,6 +104,7 @@ public class OWMKlijent {
         webResource = webResource.queryParam("APIKEY", apiKey);
 
         Calendar cal = Calendar.getInstance();
+        cal.setFirstDayOfWeek(Calendar.MONDAY);
         String odgovor = webResource.request(MediaType.APPLICATION_JSON).get(String.class);
         try {
             JsonReader reader = Json.createReader(new StringReader(odgovor));
@@ -114,7 +115,7 @@ public class OWMKlijent {
 
                 MeteoPodaci mp = new MeteoPodaci();
                 cal.setTime(new Date(jo.getJsonNumber("dt").bigDecimalValue().longValue() * 1000));
-                
+
                 mp.setTemperatureValue(new Double(jo.getJsonObject("main").getJsonNumber("temp").doubleValue()).floatValue());
                 mp.setTemperatureMin(new Double(jo.getJsonObject("main").getJsonNumber("temp_min").doubleValue()).floatValue());
                 mp.setTemperatureMax(new Double(jo.getJsonObject("main").getJsonNumber("temp_max").doubleValue()).floatValue());

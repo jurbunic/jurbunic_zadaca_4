@@ -5,6 +5,7 @@
  */
 package org.foi.nwtis.jurbunic.web.zrna;
 
+import java.io.File;
 import javax.inject.Named;
 import javax.enterprise.context.SessionScoped;
 import java.io.Serializable;
@@ -14,6 +15,7 @@ import java.util.Date;
 import java.util.List;
 import javax.ejb.EJB;
 import javax.faces.context.FacesContext;
+import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import org.foi.nwtis.jurbunic.ejb.eb.Dnevnik;
 import org.foi.nwtis.jurbunic.ejb.eb.Promjene;
@@ -22,6 +24,10 @@ import org.foi.nwtis.jurbunic.ejb.sb.DnevnikFacade;
 import org.foi.nwtis.jurbunic.ejb.sb.MeteoIoTKlijent;
 import org.foi.nwtis.jurbunic.ejb.sb.PromjeneFacade;
 import org.foi.nwtis.jurbunic.ejb.sb.UredajiFacade;
+import org.foi.nwtis.jurbunic.konfiguracije.Konfiguracija;
+import org.foi.nwtis.jurbunic.konfiguracije.KonfiguracijaApstraktna;
+import org.foi.nwtis.jurbunic.konfiguracije.NeispravnaKonfiguracija;
+import org.foi.nwtis.jurbunic.konfiguracije.NemaKonfiguracije;
 import org.foi.nwtis.jurbunic.rest.klijenti.GMKlijent;
 import org.foi.nwtis.jurbunic.web.kontrole.Izbornik;
 import org.foi.nwtis.jurbunic.web.podaci.Lokacija;
@@ -72,13 +78,20 @@ public class OdabirIoTPrognoza implements Serializable {
     private String dnevnikIp;
     private String dnevnikUrl;
 
+    private Konfiguracija konf;
+    private String azuriranjeStatus;
+
     /**
      * Creates a new instance of OdabirIoTPrognoza
      */
-    public OdabirIoTPrognoza() {
+    public OdabirIoTPrognoza() throws NemaKonfiguracije, NeispravnaKonfiguracija {
         HttpServletRequest httpServletRequest = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
         dnevnikIp = httpServletRequest.getRemoteAddr();
         dnevnikUrl = httpServletRequest.getRequestURI();
+        ServletContext context = (ServletContext) FacesContext.getCurrentInstance().getExternalContext().getContext();
+        String datoteka = context.getRealPath("/WEB-INF")
+                + File.separator + context.getInitParameter("konfiguracija");
+        konf = KonfiguracijaApstraktna.preuzmiKonfiguraciju(datoteka);
     }
 
     /**
@@ -140,12 +153,21 @@ public class OdabirIoTPrognoza implements Serializable {
         GMKlijent gmk = new GMKlijent();
         Lokacija l = gmk.getGeoLocation(azurirajAdresa);
         Uredaji azuriraniUredaj = new Uredaji(Integer.valueOf(azurirajId), azurirajNaziv, Float.valueOf(l.getLatitude()), Float.valueOf(l.getLongitude()), 1, new Date(), uredajZaAzuriranje.getVrijemeKreiranja());
-        uredajiFacade.remove(uredajZaAzuriranje);
-        uredajiFacade.create(azuriraniUredaj);
-        preuzmiRaspoloziveIoT();
-        long ukupno = System.currentTimeMillis() - pocetak;
-        zapisiUDnevnik(ukupno);
-        zapisiPromjenu(azuriraniUredaj);
+        Uredaji postoji = uredajiFacade.find(Integer.valueOf(azurirajId));      
+        if (postoji != null && postoji.getId() != uredajZaAzuriranje.getId()) {
+            long ukupno = System.currentTimeMillis() - pocetak;
+            zapisiUDnevnik(ukupno);
+            zapisiPromjenu(azuriraniUredaj);
+            azuriranjeStatus = "Azuriranje nije uspjelo!";
+        } else {
+            uredajiFacade.remove(uredajZaAzuriranje);
+            uredajiFacade.create(azuriraniUredaj);
+            preuzmiRaspoloziveIoT();
+            long ukupno = System.currentTimeMillis() - pocetak;
+            zapisiUDnevnik(ukupno);
+            zapisiPromjenu(azuriraniUredaj);
+            azuriranjeStatus = "Azuriranje uspjelo!";
+        }
     }
 
     /**
@@ -153,8 +175,10 @@ public class OdabirIoTPrognoza implements Serializable {
      * uređaj iz raspoloživih uređaja tada se forma ne pokazuje, inače se
      * zapisuje vrijednosti odabranog uređaja u varijable za inputText na formi.
      */
+    private Uredaji prosli;
     public void prikaziFormuZaAzuriranje() {
-        if (prikazAzuriraj) {
+        Uredaji u = uredajiFacade.find(Integer.valueOf(popisRaspoloziviIoT.get(0)));
+        if (prikazAzuriraj && prosli!=null && prosli.equals(u)) {
             prikazAzuriraj = false;
         } else {
             prikazAzuriraj = true;
@@ -169,6 +193,8 @@ public class OdabirIoTPrognoza implements Serializable {
             azurirajId = uredajZaAzuriranje.getId().toString();
             azurirajNaziv = uredajZaAzuriranje.getNaziv();
             azurirajAdresa = reverznoGeokodiranje(String.valueOf(uredajZaAzuriranje.getLatitude()), String.valueOf(uredajZaAzuriranje.getLongitude()));
+            azuriranjeStatus="";
+            prosli = uredajZaAzuriranje;
         }
     }
 
@@ -255,8 +281,9 @@ public class OdabirIoTPrognoza implements Serializable {
      * spremaju u polje meteo prognoza
      */
     public void dohvatiPrognozuZaOdabraneIoT() {
+        meteoIoTKlijent.postaviKorisnickePodatke(konf.dajPostavku("apikey"));
         long pocetak = System.currentTimeMillis();
-        if(gumbPregledPrognoza.compareTo("Zatvori prognoze")==0){
+        if (gumbPregledPrognoza.compareTo("Zatvori prognoze") == 0) {
             gumbPregledPrognoza = "Pregled prognoza";
             prikazTablica = false;
             return;
@@ -427,6 +454,14 @@ public class OdabirIoTPrognoza implements Serializable {
 
     public void setPrikazGumb(boolean prikazGumb) {
         this.prikazGumb = prikazGumb;
+    }
+
+    public String getAzuriranjeStatus() {
+        return azuriranjeStatus;
+    }
+
+    public void setAzuriranjeStatus(String azuriranjeStatus) {
+        this.azuriranjeStatus = azuriranjeStatus;
     }
     
 }
