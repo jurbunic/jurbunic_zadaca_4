@@ -10,6 +10,7 @@ import javax.enterprise.context.SessionScoped;
 import java.io.Serializable;
 import java.util.Date;
 import java.util.List;
+import javax.annotation.PostConstruct;
 import javax.ejb.EJB;
 import javax.faces.context.FacesContext;
 import javax.servlet.http.HttpServletRequest;
@@ -32,34 +33,49 @@ public class PregledPromjena implements Serializable {
     @EJB
     private PromjeneFacade promjeneFacade;
 
-    
     private List<Promjene> listaPromjene;
     private Integer filterId;
     private String filterNaziv;
+    private Integer brojZapisa;
 
     private String dnevnikIp;
     private String dnevnikUrl;
+
+    private long otvoreno = 0;
+    private boolean filtrirano = false;
 
     /**
      * Creates a new instance of PregledPromjena
      */
     public PregledPromjena() {
+        long pocetak = System.currentTimeMillis();
         HttpServletRequest httpServletRequest = (HttpServletRequest) FacesContext.getCurrentInstance().getExternalContext().getRequest();
         dnevnikIp = httpServletRequest.getRemoteAddr();
         dnevnikUrl = httpServletRequest.getRequestURI();
+        otvoreno = System.currentTimeMillis() - pocetak;
+    }
+
+    @PostConstruct
+    public void otvorio() {
+        zapisiUDnevnik(otvoreno);
     }
 
     /**
-     * Metoda poziva filtriranje rezultata i zapisuje u listu za prikaz promjena, filtrirane rezultate
+     * Metoda poziva filtriranje rezultata i zapisuje u listu za prikaz
+     * promjena, filtrirane rezultate
      */
     public void filtriraj() {
         long pocetak = System.currentTimeMillis();
         listaPromjene = promjeneFacade.filtriranje(filterId, filterNaziv);
-        long ukupno = System.currentTimeMillis()- pocetak;
+        filtrirano = true;
+        if (listaPromjene.size() == promjeneFacade.count()) {
+            filtrirano = false;
+        }
+        long ukupno = System.currentTimeMillis() - pocetak;
         zapisiUDnevnik(ukupno);
     }
 
-       /**
+    /**
      * Metoda zapisuje u aktivnosti korisnika u dnevnik. Potrebno je izračunati
      * vrijeme trajanja aktivnosti prije nego se poziva metoda. Korisnička
      * akcija se potom zapisuje u entitet Dnevnik.
@@ -72,12 +88,16 @@ public class PregledPromjena implements Serializable {
         d.setVrijeme(new Date());
         dnevnikFacade.create(d);
     }
+
     // -------- Getter & Setter ----------------
     public List<Promjene> getListaPromjene() {
-        if (listaPromjene == null) {
+        long pocetak = System.currentTimeMillis();
+        if (listaPromjene == null || !filtrirano) {
             listaPromjene = promjeneFacade.findAll();
+            brojZapisa = promjeneFacade.count();
         }
-
+        long kraj = System.currentTimeMillis() - pocetak;
+        zapisiUDnevnik(kraj);
         return listaPromjene;
     }
 
